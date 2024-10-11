@@ -24,6 +24,8 @@ import com.example.cupcake.data.DataSource.flavors
 import androidx.compose.ui.platform.LocalContext
 import com.example.cupcake.ui.SelectOptionScreen
 import androidx.navigation.compose.composable
+import android.content.Context
+import android.content.Intent
 import androidx.navigation.compose.NavHost
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.res.stringResource
@@ -125,19 +127,34 @@ fun CupcakeApp(
                 )
             }
             composable(route = CupcakeScreen.Summary.name) {
+                val context = LocalContext.current
                 OrderSummaryScreen(
                     orderUiState = uiState,
                     onCancelButtonClicked = {
                         cancelOrderAndNavigateToStart(viewModel, navController)
                     },
                     onSendButtonClicked = { subject: String, summary: String ->
-
+                        shareOrder(context, subject = subject, summary = summary)
                     },
                     modifier = Modifier.fillMaxHeight()
                 )
             }
         }
     }
+}
+
+private fun shareOrder(context: Context, subject: String, summary: String) {
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = "text/plain"
+        putExtra(Intent.EXTRA_SUBJECT, subject)
+        putExtra(Intent.EXTRA_TEXT, summary)
+    }
+    context.startActivity(
+        Intent.createChooser(
+            intent,
+            context.getString(R.string.new_cupcake_order)
+        )
+    )
 }
 
 private fun cancelOrderAndNavigateToStart(
